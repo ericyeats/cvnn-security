@@ -1,6 +1,8 @@
 # cvnn-security
 Python/PyTorch code for the ICML 2021 Paper: Improving Gradient Regularization using Complex-Valued Neural Networks
 
+Link to the paper: http://proceedings.mlr.press/v139/yeats21a.html
+
 ## Requirements
 numpy==1.18.4
 torch==1.8.0
