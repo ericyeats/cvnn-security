@@ -53,6 +53,9 @@ else:
 # Set up training, eval, or attack resources. May not need some of these.
 lr, batch_size, num_epochs, milestones = phelps.get_train_params(args.dataset)
 
+if args.task == "attack":
+    batch_size = 100
+
 train_tforms, test_tforms = phelps.get_tforms(args.dataset, use_noise=args.use_noise)
 norm, inorm = phelps.get_norm_inorm(args.dataset, useComp=args.use_complex)
 train_transform = transforms.Compose(train_tforms)
@@ -85,7 +88,7 @@ if args.task == "train":
 if args.task == "attack":
     
     final_acc, adv_examples_npy, labels_npy = adv_test(net, device, args.dataset, testloader, \
-        1000, args.attack_eps, args.attack_steps, args.attack_jump, norm, inorm, args.nes)
+        batch_size, 1000, args.attack_eps, args.attack_steps, args.attack_jump, norm, inorm, args.nes)
 
     if args.save_examples:
         np.save(args.examples_save_path, adv_examples_npy, allow_pickle=True)

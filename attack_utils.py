@@ -1,8 +1,9 @@
 import numpy as np
 from attacks import PGD_attack
 
-def adv_test(net, device, task, test_loader, n_ims, epsilon, iterations, useJump, norm, inorm, NES):
-    batch_size=100
+# routine to create and optionally save examples using PGD (can also set iterations=1 and useJump=False to get FGSM)
+# optionally set NES=True to replace exact gradient calculation with a Query-Based gradient estimate algorithm
+def adv_test(net, device, task, test_loader, batch_size, n_ims, epsilon, iterations, useJump, norm, inorm, NES):
     net.eval()
     net.to(device)
     shp = (n_ims, 1, 28, 28) if (task == "fmnist" or task == "mnist" or task == 'svhn') else (n_ims, 3, 32, 32)

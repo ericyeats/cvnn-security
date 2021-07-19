@@ -1,6 +1,5 @@
 import numpy as np
 import torch
-import torchvision.transforms as transforms
 import pytorch_helpers as phelps
 from attacks import PGD_attack
 
@@ -9,7 +8,8 @@ import time
 
 check_input_grad = True
 
-
+# train a network on a specified device
+# capable of gradient regularization or adversarial training with PGD
 def train_network(net, device, lr, num_epochs, milestones, beta, trainloader, testloader, norm, inorm, advTrain, advT_eps, advT_steps, advT_jump):
     net.to(device)
     print("Num Params: {}".format(phelps.num_params(net)))
@@ -67,7 +67,6 @@ def train_network(net, device, lr, num_epochs, milestones, beta, trainloader, te
                 inputs = inorm(inputs) # clear norm state
 
             if beta > 0.0: # don't want to call .backward() if not connected to graph
-                # smooth_loss = net.get_smooth_loss()
                 smooth_loss = beta * (torch.norm(inputs.grad.view(-1, inputs.numel()//inputs.shape[0]), p=1, dim=1)**2).mean()
                 smooth_loss.backward()
                 inputs.grad=None

@@ -5,6 +5,8 @@ from funcs import ComplexFC_Func, RealFC_Func, RealConv2d_Func, ComplexConv2d_Fu
 useOldInitFC = False
 useOldInitConv = False
 
+# group_sum takes a conv (or FC) output and deterministically sums across feature maps to form n_groups groups
+# this is used sometimes with complex-valued conv layers
 def group_sum(x, n_groups=2):
     gsize = x.shape[1]//n_groups
     x = sum([x[:, i*gsize:(i+1)*gsize] for i in range(n_groups)])
@@ -13,7 +15,7 @@ def group_sum(x, n_groups=2):
 class IdentityAct(torch.autograd.Function):
 
     """
-    Placeholder function object for dynamic PhasorConv / Non-PhasorConv networks
+    Placeholder identity activation function for complex-valued networks (nonlinearity built-in to complex act)
     """
 
     @staticmethod
@@ -26,6 +28,7 @@ class IdentityAct(torch.autograd.Function):
 
 identity = IdentityAct.apply
 
+# overarching class for gradient regularized convolution layers (could probably be merged with SmoothFC)
 class SmoothConv2d(torch.nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, padding_mode = 'zeros'):
         super(SmoothConv2d, self).__init__()
@@ -96,8 +99,8 @@ class RealConv2d(SmoothConv2d):
         self.reset_parameters()
 
     def reset_parameters(self):
-        init_constant = 1./np.sqrt(self.in_channels * self.kernel_size**2)
-        self.w.data.uniform_(-init_constant, init_constant)
+        init_constant = 1./np.sqrt(2.*self.in_channels * self.kernel_size**2)
+        self.w.data = torch.randn_like(self.w.data)*init_constant
         self.b.data.zero_()
 
     def forward_impl(self, x):
@@ -128,8 +131,8 @@ class RealFC(SmoothFC):
         self.reset_parameters()
 
     def reset_parameters(self):
-        init_constant = 1./np.sqrt(self.input_features)
-        self.w.data.uniform_(-init_constant, init_constant)
+        init_constant = 1./np.sqrt(2*self.input_features)
+        self.w.data = torch.randn_like(self.w.data)*init_constant
         if self.bias:
             self.b.data.uniform_(-init_constant, init_constant)
 

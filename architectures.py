@@ -18,6 +18,8 @@ def useComplexFC(useComp, in_features, out_features, bias=True):
 
 SinFunc = SinFunc.apply
 
+# Class definition for abstract gradient regularized networks. In this version of the code, gradient regularization is
+# isolated in the training section
 class GradRegNet(torch.nn.Module):
 
     def __init__(self, useComp=True, use_sin=False):
